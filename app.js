@@ -1,15 +1,12 @@
 const express = require("express");
 const cors = require("cors");
-const pool = require("./db");
+const db = require("./db");
 
 const app = express();
-// ? Middleware
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
-// ! API
-
-// ? Pencarian Buku
+// Pencarian Buku
 app.get("/books", async (req, res) => {
   const { title, author, publisher } = req.query;
 
@@ -21,6 +18,7 @@ app.get("/books", async (req, res) => {
     conditions.push(`title ILIKE $${values.length + 1}`);
     values.push(`%${title}%`);
   }
+
   if (author) {
     conditions.push(`author ILIKE $${values.length + 1}`);
     values.push(`%${author}%`);
@@ -50,14 +48,14 @@ app.get("/books", async (req, res) => {
       message: "Data berhasil ditemukan",
       data: result.rows,
     });
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ error: true, message: "Server Error" });
-    }
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: true, message: "Server Error" });
+  }
 });
 
-// ? Menampilkan buku berdasarkan id
-app.get("/books/:id", async (req, res) => {
+// Menampilkan Buku
+app.get("/books", async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -80,7 +78,7 @@ app.get("/books/:id", async (req, res) => {
   }
 });
 
-// ? Menambahkan buku
+// Tambah Buku
 app.post("/books", async (req, res) => {
   const { title, author, publish_date, publisher } = req.body;
 
@@ -109,8 +107,8 @@ app.post("/books", async (req, res) => {
   }
 });
 
-// ? Mengedit buku berdasarkan id
-app.put("/books/:id", async (req, res) => {
+// Update Buku berdasarkan ID
+app.put("/books", async (req, res) => {
   try {
     const { id } = req.params;
     const { title, author, publish_date, publisher } = req.body;
@@ -138,14 +136,19 @@ app.put("/books/:id", async (req, res) => {
   }
 });
 
-// ? Menghapus buku
-app.delete("/books/:id", async (req, res) => {
+// Menghapus Buku berdasarkan ID
+app.delete("/books", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const result = await pool.query("DELETE FROM books WHERE id=$1 RETURNING *", [id]);
+    const result = await pool.query(
+      "DELETE FROM books WHERE id=$1 RETURNING *",
+      [id]
+    );
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: true, message: "Buku tidak ditemukan" });
+      return res
+        .status(404)
+        .json({ error: true, message: "Buku tidak ditemukan" });
     }
     res.status(200).json({
       error: false,

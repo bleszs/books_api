@@ -1,5 +1,5 @@
-const { Pool } = require('pg');
-const dotenv = require('dotenv'); // variabel global
+const { Pool } = require("pg");
+const dotenv = require("dotenv"); // variabel global
 
 dotenv.config();
 const pool = new Pool({
@@ -10,7 +10,6 @@ const pool = new Pool({
     ssl: {
         rejectUnauthorized: false,
     },
-    // port: process.env.PGPORT,
+    // port: process.env.PGPORT
 });
-
 module.exports = pool;
